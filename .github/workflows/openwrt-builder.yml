@@ -234,15 +234,15 @@ jobs:
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*
 
-    - name: Upload packages directory
-      uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success'
-      with:
-        name: ${{ matrix.arch }}-${{ github.sha }}-packages
-        path: |
-          Packages
-          Packages.*
-          *.ipk
+    #- name: Upload packages directory
+    #  uses: actions/upload-artifact@main
+    #  if: steps.compile.outputs.status == 'success'
+    #  with:
+    #    name: ${{ matrix.arch }}-${{ github.sha }}-packages
+    #    path: |
+    #      Packages
+    #      Packages.*
+    #      *.ipk
 
     #- name: Upload logs directory
     #  uses: actions/upload-artifact@main
