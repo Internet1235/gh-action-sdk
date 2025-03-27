@@ -19,7 +19,7 @@ on:
       RELEASE:
         description: 'RELEASE Version'
         required: true
-        default: '2025.02.27-1334'
+        default: '2025.03.27-1336'
       BRANCH:
         description: 'feeds branch'
         required: true
