@@ -19,7 +19,8 @@ on:
       RELEASE:
         description: 'RELEASE Version'
         required: true
-        default: '2025.03.27-1336'
+#       default: 'latest'
+        default: '2025.04.27-1340'
       BRANCH:
         description: 'feeds branch'
         required: true
@@ -75,7 +76,7 @@ jobs:
             target: openwrt-sdk-mpc85xx-p1010_gcc-13.3.0_musl.Linux-x86_64
             runtime_test: false
 
-          - arch: riscv64_riscv64
+          - arch: riscv64_generic
             target: openwrt-sdk-sifiveu-generic_gcc-13.3.0_musl.Linux-x86_64
             runtime_test: false
 
