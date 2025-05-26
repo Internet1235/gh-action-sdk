@@ -160,6 +160,7 @@ jobs:
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
         cd .. && cp openwrt-sdk/bin/packages/${{ matrix.arch }}/packages/* .
+        cp openwrt-sdk/bin/packages/${{ matrix.arch }}/luci/* .
 
     - name: Check space usage
       if: (!cancelled())
@@ -235,19 +236,19 @@ jobs:
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*
 
-    #- name: Upload packages directory
-    #  uses: actions/upload-artifact@main
-    #  if: steps.compile.outputs.status == 'success'
-    #  with:
-    #    name: ${{ matrix.arch }}-${{ github.sha }}-packages
-    #    path: |
-    #      Packages
-    #      Packages.*
-    #      *.ipk
+    - name: Upload packages directory
+      uses: actions/upload-artifact@main
+      if: steps.compile.outputs.status == 'success'
+      with:
+        name: ${{ matrix.arch }}-${{ github.sha }}-packages
+        path: |
+          Packages
+          Packages.*
+          *.ipk
 
-    #- name: Upload logs directory
-    #  uses: actions/upload-artifact@main
-    #  if: steps.compile.outputs.status == 'success'
-    #  with:
-    #    name: ${{ matrix.arch }}-${{ github.sha }}-logs
-    #    path: openwrt-sdk/logs
+    - name: Upload logs directory
+      uses: actions/upload-artifact@main
+      if: steps.compile.outputs.status == 'success'
+      with:
+        name: ${{ matrix.arch }}-${{ github.sha }}-logs
+        path: openwrt-sdk/logb
