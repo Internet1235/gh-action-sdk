@@ -27,6 +27,26 @@ on:
       PACKAGE_NAME:
         description: 'package name'
         required: true
+  workflow_call:
+    inputs:
+      RELEASE:
+        description: 'RELEASE Version'
+        required: true
+#       default: 'latest'
+        default: '2025.06.04-2318'
+        type: string
+      #BRANCH:
+      #  description: 'feeds branch'
+      #  required: true
+      #  type: string
+      PACKAGE_NAME:
+        description: 'package name'
+        required: true
+        type: string
+      tags:
+        description: 'tags'
+        required: false
+        type: string
 
 env:
   FEEDS_CONF: feeds.conf.default
@@ -50,43 +70,55 @@ jobs:
           include:
           - arch: aarch64_generic
             target: openwrt-sdk-rockchip-armv8_gcc-13.3.0_musl.Linux-x86_64
+            release: openwrt-aarch64_generic
             runtime_test: true
 
           - arch: arm_cortex-a9_vfpv3-d16
             target: openwrt-sdk-mvebu-cortexa9_gcc-13.3.0_musl_eabi.Linux-x86_64
+            release: openwrt-arm_cortex-a9_vfpv3-d16
             runtime_test: false
 
           - arch: i386_pentium-mmx
             target: openwrt-sdk-x86-geode_gcc-13.3.0_musl.Linux-x86_64
+            release: openwrt-i386_pentium-mmx
             runtime_test: true
 
           - arch: mips_24kc
             target: openwrt-sdk-ath79-generic_gcc-8.4.0_musl.Linux-x86_64
+            release: openwrt-mips_24kc
             runtime_test: true
 
           - arch: mipsel_24kc
             target: openwrt-sdk-ramips-mt7621_gcc-8.4.0_musl.Linux-x86_64
+            release: openwrt-mipsel_24kc
             runtime_test: false
 
           - arch: powerpc_464fp
             target: openwrt-sdk-apm821xx-nand_gcc-13.3.0_musl.Linux-x86_64
+            release: openwrt-powerpc_464fp
             runtime_test: false
 
           - arch: powerpc_8540
             target: openwrt-sdk-mpc85xx-p1010_gcc-13.3.0_musl.Linux-x86_64
+            release: openwrt-powerpc_8540
             runtime_test: false
 
           - arch: riscv64_generic
             target: openwrt-sdk-sifiveu-generic_gcc-13.3.0_musl.Linux-x86_64
+            release: openwrt-riscv64_generic
             runtime_test: false
 
           - arch: x86_64
             target: openwrt-sdk-x86-64_gcc-13.3.0_musl.Linux-x86_64
+            release: openwrt-x86_64
             runtime_test: true
 
     steps:
     - name: Checkout
       uses: actions/checkout@main
+      with:
+        repository: Internet1235/gh-action-sdk
+        ref: sdk
 
     - name: Initialization environment
       env:
@@ -106,7 +138,7 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        wget -q https://github.com/Internet1235/compile/releases/download/${{ github.event.inputs.RELEASE }}/${{ matrix.target }}.tar.xz
+        wget -q https://github.com/Internet1235/compile/releases/download/${{ inputs.RELEASE }}/${{ matrix.target }}.tar.xz
         tar -xf ${{ matrix.target }}.tar.xz
         mv ${{ matrix.target }} openwrt-sdk
         ln -sf /workdir/openwrt-sdk $GITHUB_WORKSPACE/openwrt-sdk
@@ -123,14 +155,18 @@ jobs:
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x $DIY_P1_SH
         cd openwrt-sdk
-        sed -i 's/coolsnowwolf\/packages/Internet1235\/packages;${{ github.event.inputs.BRANCH }}/g' feeds.conf.default
         $GITHUB_WORKSPACE/$DIY_P1_SH
 
     - name: Update feeds
-      run: cd openwrt-sdk && ./scripts/feeds update -a
+      run: cd openwrt-sdk && ./scripts/feeds update -a && rm -rf feeds/packages/net/${{ inputs.PACKAGE_NAME }} && rm -rf feeds/luci/applications/luci-app-${{ inputs.PACKAGE_NAME }}
+
+    - name: Checkout package
+      uses: actions/checkout@main
+      with:
+        path: openwrt-sdk/feeds/packages/net/${{ inputs.PACKAGE_NAME }}
 
     - name: Install feeds
-      run: cd openwrt-sdk && ./scripts/feeds install ${{ github.event.inputs.PACKAGE_NAME }}
+      run: cd openwrt-sdk && ./scripts/feeds install luci-app-${{ inputs.PACKAGE_NAME }}
 
     - name: Load custom configuration
       run: |
@@ -145,7 +181,7 @@ jobs:
       run: |
         cd openwrt-sdk
         make defconfig
-        make package/${{ github.event.inputs.PACKAGE_NAME }}/download -j1 V=s
+        make package/luci-app-${{ inputs.PACKAGE_NAME }}/download -j1 V=s
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
@@ -154,13 +190,13 @@ jobs:
       run: |
         cd openwrt-sdk
         echo -e "$(nproc) thread compile"
-        make package/${{ github.event.inputs.PACKAGE_NAME }}/check -j$(nproc) V=s && make package/${{ github.event.inputs.PACKAGE_NAME }}/{clean,compile} package/index -j$(nproc) V=s
+        make package/luci-app-${{ inputs.PACKAGE_NAME }}/check -j$(nproc) V=s && make package/luci-app-${{ inputs.PACKAGE_NAME }}/{clean,compile} package/index -j$(nproc) V=s
         echo "status=success" >> $GITHUB_OUTPUT
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
-        cd .. && cp openwrt-sdk/bin/packages/${{ matrix.arch }}/packages/* .
-        cp openwrt-sdk/bin/packages/${{ matrix.arch }}/luci/* .
+        cd .. && mkdir -p ./upload && cp openwrt-sdk/bin/packages/${{ matrix.arch }}/packages/* ./upload
+        cp openwrt-sdk/bin/packages/${{ matrix.arch }}/luci/* ./upload
 
     - name: Check space usage
       if: (!cancelled())
@@ -203,19 +239,17 @@ jobs:
 
     - name: Organize files
       id: organize
-      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+      if: steps.compile.outputs.status == 'success' && !cancelled()
       run: |
-        cd openwrt/bin/targets/*/*
-        rm -rf packages
-        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+        tar -zcvf ${{ matrix.release }}.tar.gz ./upload/*
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: Upload firmware directory
-      uses: actions/upload-artifact@main
-      if: steps.organize.outputs.status == 'success' && !cancelled()
-      with:
-        name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: ${{ env.FIRMWARE }}
+    #- name: Upload firmware directory
+    #  uses: actions/upload-artifact@main
+    #  if: steps.organize.outputs.status == 'success' && !cancelled()
+    #  with:
+    #    name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+    #    path: ${{ env.FIRMWARE }}
 
     - name: Generate release tag
       id: tag1
@@ -238,17 +272,46 @@ jobs:
 
     - name: Upload packages directory
       uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success'
+      if: steps.organize.outputs.status == 'success'
       with:
         name: ${{ matrix.arch }}-${{ github.sha }}-packages
         path: |
-          Packages
-          Packages.*
-          *.ipk
+          ${{ matrix.release }}.tar.gz
 
     - name: Upload logs directory
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success'
       with:
         name: ${{ matrix.arch }}-${{ github.sha }}-logs
-        path: openwrt-sdk/logb
+        path: openwrt-sdk/logs
+
+  download-and-release:
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+    - name: mkdir release file
+      run: mkdir release
+    
+    - name: Download All artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: release
+        merge-multiple: true
+
+    - name: Generate release tag
+      id: tag
+      run: |
+        echo "release_tag=$(wget -qO- https://api.github.com/repos/${{ inputs.tags }}/tags | gawk -F '["v]' '/name/{print "v"$5;exit}')" >> $GITHUB_OUTPUT
+        touch release.txt
+        [ ${UPLOAD_GOFILE} = true && ${{ steps.gofile.outputs.url }} ] && echo "🔗 [GoFile](${{ steps.gofile.outputs.url }})" >> release.txt
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: upload packages to release
+      uses: softprops/action-gh-release@master
+      if: steps.tag.outputs.status == 'success'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.tag.outputs.release_tag }}
+        body_path: release.txt
+        files: release/*
