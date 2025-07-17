@@ -248,7 +248,7 @@ jobs:
 
     - name: Upload logs directory
       uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success'
+      if: steps.compile.outputs.status == 'success' && !cancelled()
       with:
         name: ${{ matrix.arch }}-${{ github.sha }}-logs
-        path: openwrt-sdk/logb
+        path: openwrt-sdk/logs
