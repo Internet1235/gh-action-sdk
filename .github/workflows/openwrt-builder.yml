@@ -130,7 +130,7 @@ jobs:
       run: cd openwrt-sdk && ./scripts/feeds update -a
 
     - name: Install feeds
-      run: cd openwrt-sdk && ./scripts/feeds install ${{ github.event.inputs.PACKAGE_NAME }}
+      run: cd openwrt-sdk && ./scripts/feeds install -a
 
     - name: Load custom configuration
       run: |
