@@ -60,6 +60,10 @@ jobs:
             target: openwrt-sdk-x86-geode_gcc-13.3.0_musl.Linux-x86_64
             runtime_test: true
 
+          - arch: loongarch64_generic
+            target: openwrt-sdk-loongarch64-generic_gcc-13.3.0_musl.Linux-x86_64
+            runtime_test: true
+
           - arch: mips_24kc
             target: openwrt-sdk-ath79-generic_gcc-8.4.0_musl.Linux-x86_64
             runtime_test: true
