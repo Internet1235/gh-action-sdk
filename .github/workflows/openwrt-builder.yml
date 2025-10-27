@@ -20,7 +20,7 @@ on:
         description: 'RELEASE Version'
         required: true
 #       default: 'latest'
-        default: '2025.09.19-2249'
+        default: '2025.10.27-1350'
       BRANCH:
         description: 'feeds branch'
         required: true
@@ -33,7 +33,7 @@ on:
         description: 'RELEASE Version'
         required: false
 #       default: 'latest'
-        default: '2025.09.19-2249'
+        default: '2025.10.27-1350'
         type: string
       #BRANCH:
       #  description: 'feeds branch'
