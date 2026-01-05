@@ -27,7 +27,35 @@ on:
       PACKAGE_NAME:
         description: 'package name'
         required: true
-
+      BASE_FEED:
+        description: 'source branch'
+        required: false
+        default: 'coolsnowwolf\/lede'
+      LUCI_FEED:
+        description: 'LuCI branch'
+        required: false
+        default: 'coolsnowwolf\/luci.git;openwrt-23.05'
+      gcc13:
+        description: '使用 GCC 13'
+        required: true
+        default: true
+        type: boolean
+      gcc14:
+        description: '使用 GCC 14'
+        required: false
+        default: false
+        type: boolean
+      is_change_base_feed:
+        description: '是否修改base feed源'
+        required: false
+        default: false
+        type: boolean
+      is_change_luci_feed:
+        description: '是否修改luci feed源'
+        required: false
+        default: false
+        type: boolean
+        
 env:
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: .config
@@ -50,18 +78,23 @@ jobs:
           include:
           - arch: aarch64_generic
             target: openwrt-sdk-rockchip-armv8_gcc-13.3.0_musl.Linux-x86_64
+            gcc14: openwrt-sdk-rockchip-armv8_gcc-14.3.0_musl.Linux-x86_64
 
           - arch: arm_cortex-a15_neon-vfpv4
             target: openwrt-sdk-armsr-armv7_gcc-13.3.0_musl_eabi.Linux-x86_64
+            gcc14: openwrt-sdk-armsr-armv7_gcc-14.3.0_musl_eabi.Linux-x86_64
 
           - arch: arm_cortex-a9_vfpv3-d16
             target: openwrt-sdk-mvebu-cortexa9_gcc-13.3.0_musl_eabi.Linux-x86_64
+            gcc14: openwrt-sdk-mvebu-cortexa9_gcc-14.3.0_musl_eabi.Linux-x86_64
 
           - arch: i386_pentium-mmx
             target: openwrt-sdk-x86-geode_gcc-13.3.0_musl.Linux-x86_64
+            gcc14: openwrt-sdk-x86-geode_gcc-14.3.0_musl.Linux-x86_64
 
           - arch: loongarch64_generic
             target: openwrt-sdk-loongarch64-generic_gcc-13.3.0_musl.Linux-x86_64
+            gcc14: openwrt-sdk-loongarch64-generic_gcc-14.3.0_musl.Linux-x86_64
 
           - arch: mips_24kc
             target: openwrt-sdk-ath79-generic_gcc-8.4.0_musl.Linux-x86_64
@@ -71,15 +104,19 @@ jobs:
 
           - arch: powerpc_464fp
             target: openwrt-sdk-apm821xx-nand_gcc-13.3.0_musl.Linux-x86_64
+            gcc14: openwrt-sdk-apm821xx-nand_gcc-14.3.0_musl.Linux-x86_64
 
           - arch: powerpc_8540
             target: openwrt-sdk-mpc85xx-p1010_gcc-13.3.0_musl.Linux-x86_64
+            gcc14: openwrt-sdk-mpc85xx-p1010_gcc-14.3.0_musl.Linux-x86_64
 
           - arch: riscv64_generic
             target: openwrt-sdk-sifiveu-generic_gcc-13.3.0_musl.Linux-x86_64
+            gcc14: openwrt-sdk-sifiveu-generic_gcc-14.3.0_musl.Linux-x86_64
 
           - arch: x86_64
             target: openwrt-sdk-x86-64_gcc-13.3.0_musl.Linux-x86_64
+            gcc14: openwrt-sdk-x86-64_gcc-14.3.0_musl.Linux-x86_64
 
     steps:
     - name: Checkout
@@ -103,9 +140,15 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        wget -q https://github.com/Internet1235/compile/releases/download/${{ github.event.inputs.RELEASE }}/${{ matrix.target }}.tar.xz
-        tar -xf ${{ matrix.target }}.tar.xz
-        mv ${{ matrix.target }} openwrt-sdk
+        if [[ "${{ inputs.gcc14 }}" == true ]]; then
+          wget -q https://github.com/Internet1235/compile/releases/download/${{ github.event.inputs.RELEASE }}/${{ matrix.gcc14 }}.tar.xz
+          tar -xf ${{ matrix.gcc14 }}.tar.xz
+          mv ${{ matrix.gcc14 }} openwrt-sdk
+        else
+          wget -q https://github.com/Internet1235/compile/releases/download/${{ github.event.inputs.RELEASE }}/${{ matrix.target }}.tar.xz
+          tar -xf ${{ matrix.target }}.tar.xz
+          mv ${{ matrix.target }} openwrt-sdk
+        fi
         ln -sf /workdir/openwrt-sdk $GITHUB_WORKSPACE/openwrt-sdk
 
     - name: Cache
@@ -121,6 +164,12 @@ jobs:
         chmod +x $DIY_P1_SH
         cd openwrt-sdk
         sed -i 's/coolsnowwolf\/packages/Internet1235\/packages;${{ github.event.inputs.BRANCH }}/g' feeds.conf.default
+        if [[ "${{ inputs.is_change_base_feed }}" == true ]]; then
+          sed -i 's/coolsnowwolf\/lede/${{ github.event.inputs.BASE_FEED }}/g' feeds.conf.default
+        fi
+        if [[ "${{ inputs.is_change_luci_feed }}" == true ]]; then
+          sed -i 's/coolsnowwolf\/luci.git;openwrt-23.05/${{ github.event.inputs.LUCI_FEED }}/g' feeds.conf.default
+        fi
         $GITHUB_WORKSPACE/$DIY_P1_SH
 
     - name: Update feeds

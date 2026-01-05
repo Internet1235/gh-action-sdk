@@ -25,6 +25,8 @@
 
 
 #exit 0" > package/base-files/files/etc/rc.local
+mv $GITHUB_WORKSPACE/patches/* .
+git apply ./*.patch
 
 # Copyright (c) 2019-2024 P3TERX <https://p3terx.com>
 #
