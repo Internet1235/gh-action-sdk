@@ -33,7 +33,7 @@ on:
         description: 'RELEASE Version'
         required: false
 #       default: 'latest'
-        default: '2025.10.27-1350'
+        default: '2026.01.05-2332'
         type: string
       #BRANCH:
       #  description: 'feeds branch'
@@ -71,42 +71,38 @@ jobs:
           - arch: aarch64_generic
             target: openwrt-sdk-rockchip-armv8_gcc-13.3.0_musl.Linux-x86_64
             release: openwrt-aarch64_generic
-            runtime_test: true
+
+          - arch: arm_cortex-a15_neon-vfpv4
+            target: openwrt-sdk-armsr-armv7_gcc-13.3.0_musl_eabi.Linux-x86_64
+            release: openwrt-arm_cortex-a15_neon-vfpv4
 
           - arch: arm_cortex-a9_vfpv3-d16
             target: openwrt-sdk-mvebu-cortexa9_gcc-13.3.0_musl_eabi.Linux-x86_64
             release: openwrt-arm_cortex-a9_vfpv3-d16
-            runtime_test: false
 
           - arch: i386_pentium-mmx
             target: openwrt-sdk-x86-geode_gcc-13.3.0_musl.Linux-x86_64
             release: openwrt-i386_pentium-mmx
-            runtime_test: true
 
           - arch: loongarch64_generic
             target: openwrt-sdk-loongarch64-generic_gcc-13.3.0_musl.Linux-x86_64
             release: openwrt-loongarch64_generic
-            runtime_test: true
 
           - arch: mips_24kc
             target: openwrt-sdk-ath79-generic_gcc-8.4.0_musl.Linux-x86_64
             release: openwrt-mips_24kc
-            runtime_test: true
 
           - arch: mipsel_24kc
             target: openwrt-sdk-ramips-mt7621_gcc-8.4.0_musl.Linux-x86_64
             release: openwrt-mipsel_24kc
-            runtime_test: false
 
           - arch: riscv64_generic
             target: openwrt-sdk-sifiveu-generic_gcc-13.3.0_musl.Linux-x86_64
             release: openwrt-riscv64_generic
-            runtime_test: false
 
           - arch: x86_64
             target: openwrt-sdk-x86-64_gcc-13.3.0_musl.Linux-x86_64
             release: openwrt-x86_64
-            runtime_test: true
 
     steps:
     - name: Checkout
