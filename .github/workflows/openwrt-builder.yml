@@ -34,7 +34,7 @@ on:
       LUCI_FEED:
         description: 'LuCI branch'
         required: false
-        default: 'coolsnowwolf\/luci.git;openwrt-23.05'
+        default: 'coolsnowwolf\/luci.git;openwrt-25.12'
       gcc13:
         description: '使用 GCC 13'
         required: true
@@ -42,16 +42,6 @@ on:
         type: boolean
       gcc14:
         description: '使用 GCC 14'
-        required: false
-        default: false
-        type: boolean
-      is_change_base_feed:
-        description: '是否修改base feed源'
-        required: false
-        default: false
-        type: boolean
-      is_change_luci_feed:
-        description: '是否修改luci feed源'
         required: false
         default: false
         type: boolean
@@ -164,10 +154,10 @@ jobs:
         chmod +x $DIY_P1_SH
         cd openwrt-sdk
         sed -i 's/coolsnowwolf\/packages/Internet1235\/packages;${{ github.event.inputs.BRANCH }}/g' feeds.conf.default
-        if [[ "${{ inputs.is_change_base_feed }}" == true ]]; then
+        if [[ -n "${{ inputs.BASE_FEED }}" ]]; then
           sed -i 's/coolsnowwolf\/lede/${{ github.event.inputs.BASE_FEED }}/g' feeds.conf.default
         fi
-        if [[ "${{ inputs.is_change_luci_feed }}" == true ]]; then
+        if [[ -n "${{ inputs.LUCI_FEED }}" ]]; then
           sed -i 's/coolsnowwolf\/luci.git;openwrt-23.05/${{ github.event.inputs.LUCI_FEED }}/g' feeds.conf.default
         fi
         $GITHUB_WORKSPACE/$DIY_P1_SH
@@ -300,7 +290,7 @@ jobs:
 
     - name: Upload logs directory
       uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success' && !cancelled()
+      if: ${{ !cancelled() }}
       with:
         name: ${{ matrix.arch }}-${{ github.sha }}-logs
         path: openwrt-sdk/logs
