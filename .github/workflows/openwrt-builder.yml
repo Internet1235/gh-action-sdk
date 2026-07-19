@@ -20,7 +20,7 @@ on:
         description: 'RELEASE Version'
         required: true
 #       default: 'latest'
-        default: '2026.03.27-1457'
+        default: '2026.07.19-2242'
       BRANCH:
         description: 'feeds branch'
         required: true
@@ -68,45 +68,47 @@ jobs:
           include:
           - arch: aarch64_generic
             target: openwrt-sdk-rockchip-armv8_gcc-13.3.0_musl.Linux-x86_64
-            gcc14: openwrt-sdk-rockchip-armv8_gcc-14.3.0_musl.Linux-x86_64
+            gcc14: openwrt-sdk-rockchip-armv8_gcc-14.2.0_musl.Linux-x86_64
 
           - arch: arm_cortex-a15_neon-vfpv4
             target: openwrt-sdk-armsr-armv7_gcc-13.3.0_musl_eabi.Linux-x86_64
-            gcc14: openwrt-sdk-armsr-armv7_gcc-14.3.0_musl_eabi.Linux-x86_64
+            gcc14: openwrt-sdk-armsr-armv7_gcc-14.2.0_musl_eabi.Linux-x86_64
 
           - arch: arm_cortex-a9_vfpv3-d16
             target: openwrt-sdk-mvebu-cortexa9_gcc-13.3.0_musl_eabi.Linux-x86_64
-            gcc14: openwrt-sdk-mvebu-cortexa9_gcc-14.3.0_musl_eabi.Linux-x86_64
+            gcc14: openwrt-sdk-mvebu-cortexa9_gcc-14.2.0_musl_eabi.Linux-x86_64
 
           - arch: i386_pentium-mmx
             target: openwrt-sdk-x86-geode_gcc-13.3.0_musl.Linux-x86_64
-            gcc14: openwrt-sdk-x86-geode_gcc-14.3.0_musl.Linux-x86_64
+            gcc14: openwrt-sdk-x86-geode_gcc-14.2.0_musl.Linux-x86_64
 
           - arch: loongarch64_generic
             target: openwrt-sdk-loongarch64-generic_gcc-13.3.0_musl.Linux-x86_64
-            gcc14: openwrt-sdk-loongarch64-generic_gcc-14.3.0_musl.Linux-x86_64
+            gcc14: openwrt-sdk-loongarch64-generic_gcc-14.2.0_musl.Linux-x86_64
 
           - arch: mips_24kc
-            target: openwrt-sdk-ath79-generic_gcc-8.4.0_musl.Linux-x86_64
+            target: openwrt-sdk-ath79-generic_gcc-13.3.0_musl.Linux-x86_64
+            gcc14: openwrt-sdk-ath79-generic_gcc-14.2.0_musl.Linux-x86_64
 
           - arch: mipsel_24kc
-            target: openwrt-sdk-ramips-mt7621_gcc-8.4.0_musl.Linux-x86_64
+            target: openwrt-sdk-ramips-mt7621_gcc-13.3.0_musl.Linux-x86_64
+            gcc14: openwrt-sdk-ramips-mt7621_gcc-14.2.0_musl.Linux-x86_64
 
           - arch: powerpc_464fp
             target: openwrt-sdk-apm821xx-nand_gcc-13.3.0_musl.Linux-x86_64
-            gcc14: openwrt-sdk-apm821xx-nand_gcc-14.3.0_musl.Linux-x86_64
+            gcc14: openwrt-sdk-apm821xx-nand_gcc-14.2.0_musl.Linux-x86_64
 
           - arch: powerpc_8540
             target: openwrt-sdk-mpc85xx-p1010_gcc-13.3.0_musl.Linux-x86_64
-            gcc14: openwrt-sdk-mpc85xx-p1010_gcc-14.3.0_musl.Linux-x86_64
+            gcc14: openwrt-sdk-mpc85xx-p1010_gcc-14.2.0_musl.Linux-x86_64
 
           - arch: riscv64_generic
             target: openwrt-sdk-sifiveu-generic_gcc-13.3.0_musl.Linux-x86_64
-            gcc14: openwrt-sdk-sifiveu-generic_gcc-14.3.0_musl.Linux-x86_64
+            gcc14: openwrt-sdk-sifiveu-generic_gcc-14.2.0_musl.Linux-x86_64
 
           - arch: x86_64
             target: openwrt-sdk-x86-64_gcc-13.3.0_musl.Linux-x86_64
-            gcc14: openwrt-sdk-x86-64_gcc-14.3.0_musl.Linux-x86_64
+            gcc14: openwrt-sdk-x86-64_gcc-14.2.0_musl.Linux-x86_64
 
     steps:
     - name: Checkout
@@ -158,7 +160,7 @@ jobs:
           sed -i 's/coolsnowwolf\/lede/${{ github.event.inputs.BASE_FEED }}/g' feeds.conf.default
         fi
         if [[ -n "${{ inputs.LUCI_FEED }}" ]]; then
-          sed -i 's/coolsnowwolf\/luci.git;openwrt-23.05/${{ github.event.inputs.LUCI_FEED }}/g' feeds.conf.default
+          sed -i 's/coolsnowwolf\/luci.git;openwrt-25.12/${{ github.event.inputs.LUCI_FEED }}/g' feeds.conf.default
         fi
         $GITHUB_WORKSPACE/$DIY_P1_SH
 
