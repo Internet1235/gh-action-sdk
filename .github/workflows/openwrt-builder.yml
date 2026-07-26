@@ -20,7 +20,7 @@ on:
         description: 'RELEASE Version'
         required: true
 #       default: 'latest'
-        default: '2026.03.27-1457'
+        default: '2026.07.19-2242'
       BRANCH:
         description: 'feeds branch'
         required: true
@@ -33,7 +33,7 @@ on:
         description: 'RELEASE Version'
         required: false
 #       default: 'latest'
-        default: '2026.03.27-1457'
+        default: '2026.07.19-2242'
         type: string
       #BRANCH:
       #  description: 'feeds branch'
@@ -238,7 +238,7 @@ jobs:
       id: organize
       if: steps.compile.outputs.status == 'success' && !cancelled()
       run: |
-        tar -zcvf ${{ matrix.release }}.tar.gz ./upload/*
+        tar -zcvf ${{ matrix.release }}.tar.xz ./upload/*
         echo "status=success" >> $GITHUB_OUTPUT
 
     #- name: Upload firmware directory
@@ -273,7 +273,7 @@ jobs:
       with:
         name: ${{ matrix.arch }}-${{ github.sha }}-packages
         path: |
-          ${{ matrix.release }}.tar.gz
+          ${{ matrix.release }}.tar.xz
 
     - name: Upload logs directory
       uses: actions/upload-artifact@main
