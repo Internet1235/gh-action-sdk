@@ -20,7 +20,7 @@ on:
         description: 'RELEASE Version'
         required: true
 #       default: 'latest'
-        default: '2026.07.27-1746'
+        default: '2026.08.29-2131'
       BRANCH:
         description: 'feeds branch'
         required: true
