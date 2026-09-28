@@ -11,6 +11,7 @@
 #
 
 name: OpenWrt Builder
+run-name: Test ${{ inputs.PACKAGE_NAME }} on ${{ inputs.BRANCH }} and ${{ inputs.LuCI_FEED }} and ${{ inputs.BASE_FEED }}
 
 on:
   repository_dispatch:
