@@ -206,6 +206,7 @@ jobs:
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
         cd .. && cp openwrt-sdk/bin/packages/${{ matrix.arch }}/packages/* .
         cp openwrt-sdk/bin/packages/${{ matrix.arch }}/luci/* .
+        cp openwrt-sdk/bin/packages/${{ matrix.arch }}/base/* .
 
     - name: Check space usage
       if: (!cancelled())
