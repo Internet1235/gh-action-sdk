@@ -46,6 +46,9 @@ on:
         required: false
         default: false
         type: boolean
+
+permissions:
+  contents: write
         
 env:
   FEEDS_CONF: feeds.conf.default
@@ -56,7 +59,7 @@ env:
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: false
   UPLOAD_RELEASE: false
-  UPLOAD_IPK: false
+  UPLOAD_IPK: true
   TZ: Asia/Shanghai
 
 jobs:
@@ -221,9 +224,9 @@ jobs:
 
     - name: 创建packages.zip
       id: zip
-      if: steps.compile.outputs.status == 'success' && env.UPLOAD_IPK == 'true'
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_IPK == 'true' && matrix.arch == 'mipsel_24kc'
       run: |
-        cd openwrt/bin/packages/mipsel_24kc
+        cd openwrt-sdk/bin/packages/${{ matrix.arch }}
         zip -r packages.zip *
         echo "status=success" >> $GITHUB_OUTPUT
 
